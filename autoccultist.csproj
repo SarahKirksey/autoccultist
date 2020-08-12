@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net471</TargetFramework>
     <RootNamespace>Autoccultist</RootNamespace>
   </PropertyGroup>
 
@@ -21,9 +21,17 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>.\externals\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>.\externals\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 </Project>
