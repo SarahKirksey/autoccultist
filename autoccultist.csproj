@@ -45,4 +45,10 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
     <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="brain-config\goals\brightyoungthing\" />
+    <Folder Include="brain-config\goals\detective\" />
+    <Folder Include="brain-config\goals\physician\" />
+  </ItemGroup>
 </Project>
