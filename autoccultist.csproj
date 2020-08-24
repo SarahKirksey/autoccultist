@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net471</TargetFramework>
     <RootNamespace>Autoccultist</RootNamespace>
     <CodeAnalysisRuleSet>StyleCop.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
