@@ -1,0 +1,11 @@
+name: Get the Riddle
+situation: dream
+startingRecipe:
+  slots:
+    dream:
+      elementId: waywhite
+ongoingRecipes:
+  dreamusewhiteway:
+    slots:
+      Ascent:
+        aspects: { desire: 1 }

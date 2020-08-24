@@ -1,0 +1,68 @@
+name: Get the Stag Riddle
+requirements:
+  anyOf:
+  - cardSet:
+    - aspects: { subvertable_lore: 1, lantern: 4 }
+    - aspects: { desire: 1 }
+  - cardSet:
+    - aspects: { lore: 1, knock: 4 }
+    - aspects: { desire: 1 }
+  - cardSet:
+    - aspects: { subvertable_lore: 1, moth: 2 }
+    - aspects: { subvertable_lore: 1, winter: 4 }
+    - aspects: { desire: 1 }
+  - cardSet:
+    - aspects: { subvertable_lore: 1, lantern: 2 }
+    - aspects: { subvertable_lore: 1, winter: 4 }
+    - aspects: { desire: 1 }
+  - cardSet:
+    - aspects: { lore: 1, knock: 2 }
+    - aspects: { subvertable_lore: 1, winter: 4 }
+    - aspects: { desire: 1 }
+completedWhen:
+  anyOf:
+    - elementId: waystag_after
+    - aspects: { riddle: 1, way: 1 }
+imperativeSets:
+  - !import ../imperative-sets/survive.yml
+  - !import ../imperative-sets/procure-funds.yml
+imperatives:
+  - name: The Thrycine Way
+    priority: goal
+    forbidders:
+      allOf:
+        - elementId: waywood
+    operation: !import ../operations/mansus-dreaming/discover-wood-moth.yml
+  - name: The Bleached Way
+    priority: goal
+    forbidders:
+      allOf:
+        - elementId: waywood
+    operation: !import ../operations/mansus-dreaming/discover-wood-lantern.yml
+  - name: The Serpent's Way
+    priority: goal
+    forbidders:
+      allOf:
+        - elementId: waywood
+    operation: !import ../operations/mansus-dreaming/discover-wood-knock.yml
+  - name: Discover the White Door with Winter
+    priority: goal
+    forbidders:
+      allOf:
+        - elementId: waywhite
+    operation: !import ../operations/mansus-dreaming/discover-white-winter.yml
+  - name: Discover the White Door with Lantern
+    priority: goal
+    forbidders:
+      allOf:
+        - elementId: waywhite
+    operation: !import ../operations/mansus-dreaming/discover-white-lantern.yml
+  - name: Discover the White Door with Knock
+    priority: goal
+    forbidders:
+      allOf:
+        - elementId: waywhite
+    operation: !import ../operations/mansus-dreaming/discover-white-knock.yml
+  - name: Discover the Stag Door and get its Riddle
+    priority: goal
+    operation: !import ../operations/mansus-dreaming/obtain-stag-riddle.yml
