@@ -292,7 +292,7 @@ namespace Autoccultist.Brain
                 yield return new OpenSituationAction(this.SituationId);
             }
 
-            // Get the first card.  Slotting this will usually create additional slots
+            // Get the first card.  Slotting this will not create additional slots
             var firstSlotAction = this.CreateSlotActionFromRecipe(firstSlot, recipe);
             if (firstSlotAction == null)
             {
