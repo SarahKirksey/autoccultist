@@ -1,272 +1,32 @@
 goals:
-  - name: Begin the Intro
-    requiredCards:
-      allOf:
-        - elementId: introjob
-    completedByCards:
-      allOf:
-        - elementId: bequestintro
-    imperatives:
-      - name: Work the intro job
-        priority: goal
-        situation: work
-        startingRecipe:
-          slots:
-            work:
-              elementId: introjob
-  - name: Study Bequest
-    requiredCards:
-      allOf:
-        - elementId: bequestintro
-    completedByCards:
-      allOf:
-        - elementId: ascensionenlightenmenta
-    imperatives:
-      - name: Study the Bequest
-        priority: goal
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: bequestintro
-            Approach:
-              elementId: reason
-  - name: Find a Collaborator
-    requiredCards:
-      allOf:
-        - elementId: contactintro
-    completedByCards:
-      allOf:
-        - aspects:
-            acquaintance: 1
-    imperatives:
-      - &imperative-work-for-a-living
-        name: Work for a living
-        priority: maintenance
-        situation: work
-        startingRecipe:
-          slots:
-            work:
-              elementId: health
-      - &imperative-heal-injury-with-funds
-        name: Heal injury
-        priority: critical
-        situation: dream
-        startingRecipe:
-          slots:
-            dream:
-              elementId: injury
-            medicines:
-              elementId: funds
-      - &imperative-paint-away-restlessness
-        name: Paint away Restlessness
-        priority: critical
-        situation: work
-        startingRecipe:
-          slots:
-            work:
-              elementId: passion
-        ongoingRecipes:
-          paintbasic:
-            slots:
-              Yearning:
-                elementId: restlessness
-      - &imperative-heal-affliction-with-funds
-        name: Heal Affliction with funds
-        priority: critical
-        situation: dream
-        startingRecipe:
-          slots:
-            dream:
-              elementId: affliction
-            medicine:
-              elementId: funds
-      - name: Contact Collaborator
-        priority: goal
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: contactintro
-      - &imperative-refresh-health
-        name: Refresh health
-        priority: maintenance
-        situation: dream
-        startingRecipe:
-          slots:
-            dream:
-              elementId: fatigue
+  - !import goals/aspirant/begin-intro.yml
+  - !import goals/aspirant/study-bequest-passion.yml
   - name: Wait for health refresh
-    requiredCards:
-      allOf:
+    requirements:
+      anyOf:
         - elementId: fatigue
-    completedByCards:
-      allOf:
-        - elementId: health
-    imperatives:
-      - *imperative-refresh-health
-  - name: Get Health skill A
-    requiredCards:
-      allOf:
-        - elementId: health
-    completedByCards:
+        - elementId: hunger
+        - elementId: injury
+        - elementId: affliction
+    completedWhen:
       anyOf:
-        - elementId: skillhealtha
-        - elementId: skillhealthb
-        - elementId: skillhealthc
+        - elementId: health
+        - aspects:
+            healthskill: 1
+    imperativeSets:
+      - !import imperative-sets/survive.yml
     imperatives:
-      - *imperative-work-for-a-living
-      - *imperative-heal-injury-with-funds
-      - *imperative-paint-away-restlessness
-      - *imperative-heal-affliction-with-funds
-      - *imperative-refresh-health
-      - &imperative-learn-from-vitality
-        name: Learn health from Vitality
-        priority: goal
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: vitality
-            morevitality:
-              elementId: vitality
-  - name: Get Health skill B
-    requiredCards:
-      allOf:
-        - elementId: skillhealtha
-    completedByCards:
-      anyOf:
-        - elementId: skillhealthb
-        - elementId: skillhealthc
-    imperatives:
-      - *imperative-refresh-health
-      - *imperative-paint-away-restlessness
-      - *imperative-heal-affliction-with-funds
-      - *imperative-heal-injury-with-funds
-      - &imperative-excersize
-        name: Excersize
-        priority: maintenance
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: health
-      # YamlDotNet merging is broken
-      #- <<: *imperative-learn-from-vitality
-      - name: Learn health from Vitality
-        priority: goal
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: vitality
-            morevitality:
-              elementId: vitality
-        forbidWhenCardsPresent:
-          # Do not monopolize study when we have vitality lessons to study
-          # This might be a sign we need more than 3 priority levels,
-          #   but this is more flexible in the long run
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-      - name: Stronger Physique work
-        priority: maintenance
-        situation: work
-        forbidWhenCardsPresent:
-          # Don't steal away our health skill card when we need it to upgrade.
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-        startingRecipe:
-          slots:
-            work:
-              elementId: skillhealtha
-            Health:
-              elementId: health
-      - name: Increase health skill
-        priority: goal
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: skillhealtha
-            V1:
-              elementId: vitalityplus
-            V2:
-              elementId: vitalityplus
-  - name: Get Health skill C
-    requiredCards:
-      allOf:
-        - elementId: skillhealthb
-    completedByCards:
-      allOf:
-        - elementId: skillhealthc
-    imperatives:
-      - *imperative-refresh-health
-      - *imperative-paint-away-restlessness
-      - *imperative-heal-affliction-with-funds
-      - *imperative-heal-injury-with-funds
-      - *imperative-excersize
-      # YamlDotNet merging is broken
-      #- <<: *imperative-learn-from-vitality
-      - name: Learn health from Vitality
-        priority: goal
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: vitality
-            morevitality:
-              elementId: vitality
-        forbidWhenCardsPresent:
-          # Stop gaining lessons when we have enough
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-      - name: Hardened Physique work
-        priority: maintenance
-        situation: work
-        forbidWhenCardsPresent:
-          # Stop using our skill card when we have enough lessons
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-        startingRecipe:
-          slots:
-            work:
-              elementId: skillhealthb
-            Health:
-              elementId: health
-      - name: Increase health skill
-        priority: goal
-        situation: study
-        startingRecipe:
-          slots:
-            study:
-              elementId: skillhealthb
-            V1:
-              elementId: vitalityplus
-            V2:
-              elementId: vitalityplus
-            V3:
-              elementId: vitalityplus
+      - !import imperatives/maint-refresh-health.yml
+  - !import goals/aquire-skillhealtha.yml
+  - !import goals/aquire-skillhealthb.yml
+  - !import goals/aquire-skillhealthc.yml
+  - !import goals/aquire-skillpassiona.yml
+  - !import goals/aquire-skillpassionb.yml
+  - !import goals/aquire-skillpassionc.yml
+  - !import goals/aspirant/discover-bookdealer.yml
+  - !import goals/consume-bookdealer.yml
+  - !import goals/aspirant/find-collaborator.yml
   - name: Survive
-    requiredCards:
-      allOf:
-        - elementId: skillhealthc
-    imperatives:
-      - *imperative-refresh-health
-      - *imperative-paint-away-restlessness
-      - *imperative-heal-affliction-with-funds
-      - *imperative-heal-injury-with-funds
-      - name: Hardened Physique work
-        priority: maintenance
-        situation: work
-        startingRecipe:
-          slots:
-            work:
-              elementId: skillhealthc
-            Health:
-              elementId: health
+    imperativeSets:
+      - !import imperative-sets/survive.yml
+      - !import imperative-sets/procure-funds.yml

@@ -1,0 +1,21 @@
+name: Test mansus
+imperativeSets:
+  - !import ../imperative-sets/survive.yml
+  - !import ../imperative-sets/procure-funds.yml
+imperatives:
+  - operation:
+      situation: dream
+      startingRecipe:
+        slots:
+          dream:
+            elementId: waywood
+      ongoingRecipes:
+        dreamusewoodway:
+          slots:
+            Path:
+              elementId: passion
+        dreamenterwood:
+          mansusChoice:
+            faceUpCard:
+              elementId: fragmentsecrethistories
+            deck: mansus_wood2

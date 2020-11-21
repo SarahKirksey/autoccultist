@@ -1,70 +1,52 @@
-// TODO: Choose previously reserved card and clear its reservation.
-// TODO: Move this logic to a card manager and take care of reservations there
-using System.Collections.Generic;
-using System.Linq;
-using Assets.CS.TabletopUI;
-
 namespace Autoccultist.Actor.Actions
 {
-    class SlotCardAction : IAutoccultistAction
-    {
-        public string SituationId { get; private set; }
-        public string SlotId { get; private set; }
-        public ICardMatcher CardMatcher { get; private set; }
+    using System.Collections.Generic;
+    using System.Linq;
+    using Assets.CS.TabletopUI;
 
+    /// <summary>
+    /// An action to slot a card into a slot of a situation.
+    /// </summary>
+    public class SlotCardAction : IAutoccultistAction
+    {
         // TODO: This should take a specific card reservation, not a card matcher.
-        public SlotCardAction(string situationId, string slotId, ICardMatcher cardMatcher)
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SlotCardAction"/> class.
+        /// </summary>
+        /// <param name="situationId">The situation id of the situation to slot the card into.</param>
+        /// <param name="slotId">The slot id of the slot in the situation to slot the card into.</param>
+        /// <param name="cardMatcher">The card matcher to choose a card to slot.</param>
+        public SlotCardAction(string situationId, string slotId, ICardChooser cardMatcher)
         {
             this.SituationId = situationId;
             this.SlotId = slotId;
             this.CardMatcher = cardMatcher;
         }
-        public bool CanExecute()
-        {
-            var situation = GameAPI.GetSituation(this.SituationId);
-            if (situation == null)
-            {
-                return false;
-            }
 
-            switch (situation.SituationClock.State)
-            {
-                case SituationState.Complete:
-                case SituationState.FreshlyStarted:
-                    return false;
-            }
+        /// <summary>
+        /// Gets the situation id of the situation to slot the card into.
+        /// </summary>
+        public string SituationId { get; }
 
-            IList<RecipeSlot> slots;
-            switch (situation.SituationClock.State)
-            {
-                case SituationState.Unstarted:
-                    slots = situation.situationWindow.GetStartingSlots();
-                    break;
-                case SituationState.Ongoing:
-                    slots = situation.situationWindow.GetOngoingSlots();
-                    break;
-                default:
-                    throw new ActionFailureException(this, "Situation is not in an appropriate state to slot cards.");
-            }
+        /// <summary>
+        /// Gets the slot id of the slot in the situation to slot the card into.
+        /// </summary>
+        public string SlotId { get; }
 
-            var slot = slots.FirstOrDefault(x => x.GoverningSlotSpecification.Id == this.SlotId);
-            if (!slot)
-            {
-                return false;
-            }
+        /// <summary>
+        /// Gets the card matcher that will get the card to slot.
+        /// </summary>
+        public ICardChooser CardMatcher { get; }
 
-            var card = CardManager.ChooseCard(this.CardMatcher);
-            if (card == null)
-            {
-                return false;
-            }
-
-
-            return true;
-        }
-
+        /// <inheritdoc/>
         public void Execute()
         {
+            if (GameAPI.IsInMansus)
+            {
+                throw new ActionFailureException(this, "Cannot interact with situations when in the mansus.");
+            }
+
             var situation = GameAPI.GetSituation(this.SituationId);
             if (situation == null)
             {
@@ -94,11 +76,6 @@ namespace Autoccultist.Actor.Actions
             if (card == null)
             {
                 throw new ActionFailureException(this, "No matching card was found.");
-            }
-
-            if (this.SituationId == "dream")
-            {
-                AutoccultistPlugin.Instance.LogTrace($"Slotting situation {this.SituationId} slot id {this.SlotId}");
             }
 
             GameAPI.SlotCard(slot, card);
