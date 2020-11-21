@@ -1,0 +1,72 @@
+name: Expand the Cult
+priority: goal
+forbidders:
+  anyOf:
+   - cardSet:
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+      - aspects:
+          mortal: 1
+operation:
+  name: Meet Followers
+  situation: talk
+  startingRecipe:
+    slots:
+      talk:
+        aspects: { subvertable_lore: 1 }

@@ -5,7 +5,9 @@ requirements:
     - !import ../conditions/can-procure-funds.yml
 completedWhen:
   allOf:
-    - elementId: locationbookdealer_exhausted
+    - anyOf:
+        - elementId: locationbookdealer_exhausted
+        - elementId: hq.bookshop
     - noneOf:
         - !import ../conditions/readable-or-translatable-books.yml
 imperativeSets:

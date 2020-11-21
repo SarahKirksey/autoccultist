@@ -8,7 +8,7 @@ operation:
       talk:
         aspects: { follower_wound: 1 }
   ongoingRecipes:
-    paintbasic:
+    talktofollower:
       slots:
         Subject:
           elementId: funds
