@@ -1,12 +1,6 @@
 /externals/
 /obj/
 /bin/
-.vs/autoccultist/DesignTimeBuild/.dtbcache
-.vs/autoccultist/v15/.suo
-.vs/autoccultist/v15/Browse.VC.db
-.vs/autoccultist/v15/Server/sqlite3/db.lock
-.vs/autoccultist/v15/Server/sqlite3/storage.ide
-.vs/autoccultist/v15/Server/sqlite3/storage.ide-shm
-.vs/autoccultist/v15/Server/sqlite3/storage.ide-wal
-.vs/config/applicationhost.config
 autoccultist.sln
+.vs/
+autoccultist.csproj
