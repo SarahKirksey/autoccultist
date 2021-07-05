@@ -1,0 +1,11 @@
+name: Discover the White Door (W)
+situation: dream
+startingRecipe:
+  slots:
+    dream:
+      elementId: passion
+ongoingRecipes:
+  dreamstartingpassion:
+    slots:
+      Path:
+        aspects: { subvertable_lore: 1, winter: 4 }

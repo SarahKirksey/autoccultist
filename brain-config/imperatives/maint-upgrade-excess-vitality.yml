@@ -28,5 +28,4 @@ forbidders:
   - cardSet:
       - elementId: eruditionplus
       - elementId: erudition
-  - aspects:
-      text: 1
+  - !import ../conditions/readable-or-translatable-books.yml

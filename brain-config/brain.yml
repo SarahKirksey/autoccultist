@@ -56,7 +56,10 @@ goals:
   - !import goals/aspirant/discover-bookdealer.yml
   - !import goals/consume-bookdealer.yml
   - !import goals/aspirant/find-collaborator.yml
+  - !import goals/acquire-stag-riddle.yml
   - name: Survive
     imperativeSets:
       - !import imperative-sets/survive.yml
       - !import imperative-sets/procure-funds.yml
+    imperatives:
+      - !import imperatives/followers/maint-heal-follower.yml

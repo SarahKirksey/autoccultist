@@ -4,6 +4,7 @@ namespace Autoccultist.GUI
     using Autoccultist.Config;
     using Autoccultist.Yaml;
     using UnityEngine;
+    using UnityEngine.UI;
     using YamlDotNet.Core;
 
     /// <summary>

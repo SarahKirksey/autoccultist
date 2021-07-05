@@ -1,0 +1,11 @@
+name: Discover the White Door (K)
+situation: dream
+startingRecipe:
+  slots:
+    dream:
+      elementId: waywood
+ongoingRecipes:
+  dreamstartingpassion:
+    slots:
+      Path:
+        aspects: { lore: 1, knock: 4 }

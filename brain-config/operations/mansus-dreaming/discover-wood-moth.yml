@@ -1,0 +1,11 @@
+name: The Thrycine Way
+situation: dream
+startingRecipe:
+  slots:
+    dream:
+      elementId: passion
+ongoingRecipes:
+  dreamstartingpassion:
+    slots:
+      Path:
+        aspects: { subvertable_lore: 1, moth: 2 }

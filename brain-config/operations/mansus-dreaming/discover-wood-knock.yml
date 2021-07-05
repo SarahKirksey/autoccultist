@@ -1,0 +1,11 @@
+name: The Serpent's Way
+situation: dream
+startingRecipe:
+  slots:
+    dream:
+      elementId: passion
+ongoingRecipes:
+  dreamstartingpassion:
+    slots:
+      Path:
+        aspects: { lore: 1, knock: 2 }
