@@ -29,166 +29,34 @@ sharedImperatives:
     operation: !import operations/study-health.yml
 
 goals:
-  - name: Begin the Intro
-    requiredCards:
-      allOf:
-        - elementId: introjob
-    completedByCards:
-      allOf:
-        - elementId: bequestintro
-    imperatives:
-      - name: Work the intro job
-        priority: goal
-        operation:
-          situation: work
-          startingRecipe:
-            slots:
-              work:
-                elementId: introjob
-  - name: Study Bequest
-    requiredCards:
-      allOf:
-        - elementId: bequestintro
-        - elementId: passion
-    completedByCards:
-      allOf:
-        - elementId: ascensionpowera
-    imperatives:
-      - name: Study the Bequest
-        priority: goal
-        operation:
-          situation: study
-          startingRecipe:
-            slots:
-              study:
-                elementId: bequestintro
-              Approach:
-                elementId: passion
-  - name: Find a Collaborator
-    requiredCards:
-      allOf:
-        - elementId: contactintro
-    completedByCards:
-      allOf:
-        - aspects:
-            acquaintance: 1
-    imperatives:
-      - *imp-maint-work-health
-      - *imp-crit-heal-injury
-      - *imp-crit-dispose-restlessness
-      - *imp-crit-heal-affliction
-      - *imp-maint-refresh-health
-      - name: Contact Collaborator
-        priority: goal
-        operation:
-          situation: study
-          startingRecipe:
-            slots:
-              study:
-                elementId: contactintro
+  - !import goals/aspirant/begin-intro.yml
+  - !import goals/aspirant/study-bequest-passion.yml
   - name: Wait for health refresh
-    requiredCards:
-      allOf:
+    requirements:
+      anyOf:
         - elementId: fatigue
-    completedByCards:
-      allOf:
+        - elementId: hunger
+        - elementId: injury
+        - elementId: affliction
+    completedWhen:
+      anyOf:
         - elementId: health
+        - aspects:
+            healthskill: 1
+    imperativeSets:
+      - !import imperative-sets/survive.yml
     imperatives:
-      - *imp-maint-refresh-health
-  - name: Get Health skill A
-    requiredCards:
-      allOf:
-        - elementId: health
-    completedByCards:
-      anyOf:
-        - elementId: skillhealtha
-        - elementId: skillhealthb
-        - elementId: skillhealthc
-        - elementId: skillhealthd_strength
-        - elementId: skillhealthd_grace
-    imperatives:
-      - *imp-maint-work-health
-      - *imp-crit-heal-injury
-      - *imp-crit-dispose-restlessness
-      - *imp-crit-heal-affliction
-      - *imp-maint-refresh-health
-      - *imp-goal-vitality-lesson
-  - name: Get Health skill B
-    requiredCards:
-      allOf:
-        - elementId: skillhealtha
-    completedByCards:
-      anyOf:
-        - elementId: skillhealthb
-        - elementId: skillhealthc
-        - elementId: skillhealthd_strength
-        - elementId: skillhealthd_grace
-    imperatives:
-      - *imp-maint-refresh-health
-      - *imp-crit-dispose-restlessness
-      - *imp-crit-heal-affliction
-      - *imp-crit-heal-injury
-      - *imp-vitality-from-health
-      - <<: *imp-goal-vitality-lesson
-        forbidWhenCardsPresent:
-          # Do not monopolize study when we have vitality lessons to study
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-      - name: Stronger Physique work
-        priority: maintenance
-        operation: !import operations/work-skillhealtha.yml
-        forbidWhenCardsPresent:
-          # Don't steal away our health skill card when we need it to upgrade.
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-      - name: Upgrade Stronger Physique to Hardened Physique
-        priority: goal
-        operation: !import operations/upgrade-skillhealtha.yml
-  - name: Get Health skill C
-    requiredCards:
-      allOf:
-        - elementId: skillhealthb
-    completedByCards:
-      anyOf:
-        - elementId: skillhealthc
-        - elementId: skillhealthd_strength
-        - elementId: skillhealthd_grace
-    imperatives:
-      - *imp-maint-refresh-health
-      - *imp-crit-dispose-restlessness
-      - *imp-crit-heal-affliction
-      - *imp-crit-heal-injury
-      - *imp-vitality-from-health
-      - <<: *imp-goal-vitality-lesson
-        forbidWhenCardsPresent:
-          # Stop gaining lessons when we have enough
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-      - name: Hardened Physique work
-        priority: maintenance
-        operation: !import operations/work-skillhealthb.yml
-        forbidWhenCardsPresent:
-          # Stop using our skill card when we have enough lessons
-          allOf:
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-            - elementId: vitalityplus
-      - name: Upgrade Hardened Physique to Steely Physique
-        priority: goal
-        operation: !import operations/upgrade-skillhealthb.yml
+      - !import imperatives/maint-refresh-health.yml
+  - !import goals/aquire-skillhealtha.yml
+  - !import goals/aquire-skillhealthb.yml
+  - !import goals/aquire-skillhealthc.yml
+  - !import goals/aquire-skillpassiona.yml
+  - !import goals/aquire-skillpassionb.yml
+  - !import goals/aquire-skillpassionc.yml
+  - !import goals/aspirant/discover-bookdealer.yml
+  - !import goals/consume-bookdealer.yml
+  - !import goals/aspirant/find-collaborator.yml
   - name: Survive
-    requiredCards:
-      allOf:
-        - elementId: skillhealthc
-    imperatives:
-      - *imp-maint-refresh-health
-      - *imp-crit-dispose-restlessness
-      - *imp-crit-heal-affliction
-      - *imp-crit-heal-injury
-      - name: Steely Physique work
-        priority: maintenance
-        operation: !import operations/work-skillhealthc.yml
+    imperativeSets:
+      - !import imperative-sets/survive.yml
+      - !import imperative-sets/procure-funds.yml

@@ -1,19 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Autoccultist.Brain.Config;
-
 namespace Autoccultist.Brain
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    /// <summary>
+    /// A static class responsible for mangaing all situation orchestrations.
+    /// </summary>
     public static class SituationOrchestrator
     {
-        private static IDictionary<string, ISituationOrchestration> executingOperationsBySituation = new Dictionary<string, ISituationOrchestration>();
+        private static readonly IDictionary<string, ISituationOrchestration> ExecutingOperationsBySituation = new Dictionary<string, ISituationOrchestration>();
 
+        /// <summary>
+        /// Gets all current orchestrations.
+        /// </summary>
+        public static IReadOnlyDictionary<string, ISituationOrchestration> CurrentOrchestrations
+        {
+            get
+            {
+                // Make a copy to ensure it is not mutated.
+                return ExecutingOperationsBySituation.ToDictionary(entry => entry.Key, entry => entry.Value);
+            }
+        }
+
+        /// <summary>
+        /// Run all updates for the situation orchestrator.
+        /// </summary>
         public static void Update()
         {
-            foreach (var executor in executingOperationsBySituation.Values.ToArray())
+            foreach (var operation in ExecutingOperationsBySituation.Values.ToArray())
             {
-                executor.Update();
+                operation.Update();
             }
 
             // After we update the existing situation handlers, dump any completed ones if any remain.
@@ -22,7 +39,7 @@ namespace Autoccultist.Brain
             {
                 var situationId = situation.GetTokenId();
 
-                if (executingOperationsBySituation.ContainsKey(situationId))
+                if (ExecutingOperationsBySituation.ContainsKey(situationId))
                 {
                     // Already orchestrating this
                     continue;
@@ -34,15 +51,47 @@ namespace Autoccultist.Brain
                     continue;
                 }
 
-                // We still want to dump even if the situation has nothing in it
-                //  This is particulary the case for situations that end with no output,
-                //  such as suspicion-free suspicion
+                /*
+                We still want to dump even if the situation has nothing in it
+                This is particulary the case for situations that end with no output,
+                such as suspicion-free suspicion
+                */
 
                 DumpSituation(situationId);
             }
         }
 
-        public static bool SituationIsAvailable(string situationId)
+        /// <summary>
+        /// Aborts all ongoing operations.
+        /// </summary>
+        public static void Abort()
+        {
+            foreach (var operation in ExecutingOperationsBySituation.Values.ToArray())
+            {
+                operation.Abort();
+            }
+
+            ExecutingOperationsBySituation.Clear();
+        }
+
+        /// <summary>
+        /// Dumps the status of the situation orchestrator to the console.
+        /// </summary>
+        public static void LogStatus()
+        {
+            AutoccultistPlugin.Instance.LogInfo("We are orchestrating:");
+            foreach (var entry in ExecutingOperationsBySituation)
+            {
+                AutoccultistPlugin.Instance.LogInfo($"-- {entry.Key}: {entry.Value}");
+            }
+        }
+
+        /// <summary>
+        /// Determines if the situation is available for use.
+        /// </summary>
+        /// <param name="situationId">The situation id of the situation to check.</param>
+        /// <returns>True if the situation is idle and available, False otherwise.</returns>
+        public static bool IsSituationAvailable(string situationId)
         {
             var controller = GameAPI.GetSituation(situationId);
             if (controller == null)
@@ -58,46 +107,49 @@ namespace Autoccultist.Brain
             }
 
             // Not busy, but we are still orchestrating it.
-            return !executingOperationsBySituation.ContainsKey(situationId);
+            return !ExecutingOperationsBySituation.ContainsKey(situationId);
         }
 
-        public static void ExecuteOperation(Operation operation)
+        /// <summary>
+        /// Executes the given operation.
+        /// </summary>
+        /// <param name="operation">The operation to execute.</param>
+        public static void ExecuteOperation(IOperation operation)
         {
-            if (!SituationIsAvailable(operation.Situation))
+            if (!IsSituationAvailable(operation.Situation))
             {
                 throw new OperationFailedException($"Cannot execute operation for situation {operation.Situation} because the situation is not available.");
             }
 
-            if (executingOperationsBySituation.ContainsKey(operation.Situation))
+            if (ExecutingOperationsBySituation.ContainsKey(operation.Situation))
             {
                 return;
             }
 
-            var executor = new OperationOrchestration(operation);
-            executingOperationsBySituation[operation.Situation] = executor;
-            executor.Completed += OnExecutorCompleted;
-            executor.Start();
+            var orchestration = new OperationOrchestration(operation);
+            ExecutingOperationsBySituation[operation.Situation] = orchestration;
+            orchestration.Completed += OnOrchestrationCompleted;
+            orchestration.Start();
         }
-
 
         private static void DumpSituation(string situationId)
         {
-            if (executingOperationsBySituation.ContainsKey(situationId))
+            if (ExecutingOperationsBySituation.ContainsKey(situationId))
             {
                 throw new OperationFailedException($"Cannot dump situation {situationId} because the situation already has an orchestration running.");
             }
 
-            var executor = new DumpSituationOrchestration(situationId);
-            executingOperationsBySituation[situationId] = executor;
-            executor.Completed += OnExecutorCompleted;
-            executor.Start();
+            var orchestration = new DumpSituationOrchestration(situationId);
+            ExecutingOperationsBySituation[situationId] = orchestration;
+            orchestration.Completed += OnOrchestrationCompleted;
+            orchestration.Start();
         }
 
-        private static void OnExecutorCompleted(object sender, EventArgs e)
+        private static void OnOrchestrationCompleted(object sender, EventArgs e)
         {
-            var executor = sender as ISituationOrchestration;
-            executor.Completed -= OnExecutorCompleted;
-            executingOperationsBySituation.Remove(executor.SituationId);
+            var orchestration = sender as ISituationOrchestration;
+            orchestration.Completed -= OnOrchestrationCompleted;
+            ExecutingOperationsBySituation.Remove(orchestration.SituationId);
         }
     }
 }

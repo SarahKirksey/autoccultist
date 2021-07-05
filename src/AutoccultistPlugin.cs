@@ -1,24 +1,31 @@
-﻿using System.IO;
-using Autoccultist.Brain;
-using Autoccultist.Brain.Config;
-using Autoccultist.Actor;
-using UnityEngine;
-
 namespace Autoccultist
 {
+    using System.IO;
+    using Autoccultist.Brain;
+    using Autoccultist.Config;
+    using Autoccultist.GameState;
+    using Autoccultist.GUI;
+    using HarmonyLib;
+    using UnityEngine;
+
+    /// <summary>
+    /// The main entrypoint for Autoccultist, loaded by BenInEx.
+    /// </summary>
     [BepInEx.BepInPlugin("net.robophreddev.CultistSimulator.Autoccultist", "Autoccultist", "0.0.1")]
     public class AutoccultistPlugin : BepInEx.BaseUnityPlugin
     {
-        private bool isRunning = false;
-
-        private AutoccultistBrain brain;
-
+        /// <summary>
+        /// Gets the instance of the plugin.
+        /// </summary>
         public static AutoccultistPlugin Instance
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the directory the mod dll is located in.
+        /// </summary>
         public static string AssemblyDirectory
         {
             get
@@ -29,114 +36,155 @@ namespace Autoccultist
             }
         }
 
-        void Start()
+        /// <summary>
+        /// Starts the mod.
+        /// </summary>
+        public void Start()
         {
             Instance = this;
 
-            Dispatcher.Initialize();
+            var harmony = new Harmony("net.robophreddev.CultistSimulator.Autoccultist");
+            harmony.PatchAll();
 
-            var brainConfig = this.LoadBrainConfig();
-            LogInfo($"Loaded {brainConfig.Goals.Count} goals.");
+            GameAPI.Initialize();
 
-            this.brain = new AutoccultistBrain(brainConfig);
+            this.ReloadTasks();
 
             this.LogInfo("Autoccultist initialized.");
         }
 
-        BrainConfig LoadBrainConfig()
+        /// <summary>
+        /// Reload all tasks in the TaskDriver.
+        /// </summary>
+        public void ReloadTasks()
         {
-            var configPath = System.IO.Path.Combine(AssemblyDirectory, "brain.yml");
-            this.LogInfo(string.Format("Loading config from {0}", configPath));
-            return BrainConfig.Load(configPath);
+            this.LogInfo("Reloading tasks");
+            Library.LoadAll();
+            var config = this.LoadBrainConfig();
+            TaskDriver.SetTasks(config.Goals);
         }
 
-        void Update()
+        /// <summary>
+        /// Renders the mod GUI.
+        /// </summary>
+        public void OnGUI()
+        {
+            if (!GameAPI.IsRunning)
+            {
+                return;
+            }
+
+            DiagnosticGUI.OnGUI();
+            GoalsGUI.OnGUI();
+        }
+
+        /// <summary>
+        /// Runs an update tick on the mod.
+        /// </summary>
+        public void Update()
+        {
+            GameStateProvider.Invalidate();
+            MechanicalHeart.Update();
+            this.HandleHotkeys();
+        }
+
+        /// <summary>
+        /// Log an info-level message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        public void LogInfo(string message)
+        {
+            this.Logger.LogInfo(message);
+        }
+
+        /// <summary>
+        /// Log a trace-level message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        public void LogTrace(string message)
+        {
+            this.Logger.LogInfo(message);
+        }
+
+        /// <summary>
+        /// Log a warning-level message.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        public void LogWarn(string message)
+        {
+            this.Logger.LogWarning(message);
+            GameAPI.Notify("Autoccultist Warning", message);
+        }
+
+        /// <summary>
+        /// Log and handle a fatal event.
+        /// This will also stop the brain from running.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        public void Fatal(string message)
+        {
+            this.Logger.LogError("Fatal - " + message);
+            GameAPI.Notify("Autoccultist Fatal", message);
+            this.StopAutoccultist();
+        }
+
+        private void HandleHotkeys()
         {
             if (Input.GetKeyDown(KeyCode.F11))
             {
-                if (this.isRunning)
+                if (MechanicalHeart.IsRunning)
                 {
-                    this.LogInfo("Stopping brain");
-                    this.brain.Stop();
-                    this.isRunning = false;
+                    this.LogInfo("Stopping Autoccultist");
+                    this.StopAutoccultist();
                 }
                 else
                 {
-                    this.LogInfo("Starting brain");
-                    this.brain.Start();
-                    this.isRunning = true;
+                    if (Input.GetKey(KeyCode.LeftShift))
+                    {
+                        this.ReloadTasks();
+                    }
+                    else
+                    {
+                        this.LogInfo("Starting Autoccultist");
+                        this.StartAutoccultist();
+                    }
                 }
             }
             else if (Input.GetKeyDown(KeyCode.F10))
             {
-                // Ensure not running
-                this.isRunning = false;
-                this.LogInfo("Step");
-                this.brain.Start();
-                UpdateChildren();
-                this.brain.Stop();
-
+                DiagnosticGUI.IsShowing = !DiagnosticGUI.IsShowing;
             }
             else if (Input.GetKeyDown(KeyCode.F9))
             {
                 this.LogInfo("Dumping status");
-                this.brain.LogStatus();
+                GoalDriver.DumpStatus();
+                SituationOrchestrator.LogStatus();
             }
             else if (Input.GetKeyDown(KeyCode.F8))
             {
                 this.LogInfo("Dumping situations");
                 SituationLogger.LogSituations();
             }
-
-            if (!this.isRunning)
-            {
-                return;
-            }
-            UpdateChildren();
         }
 
-        public void LogInfo(string message)
+        private void StartAutoccultist()
         {
-            Dispatcher.RunOnMainThread(() =>
-            {
-                this.Logger.LogInfo(message);
-            });
+            TaskDriver.Start();
+            MechanicalHeart.Start();
         }
 
-        public void LogTrace(string message)
+        private void StopAutoccultist()
         {
-            Dispatcher.RunOnMainThread(() =>
-            {
-                this.Logger.LogInfo(message);
-            });
-
+            MechanicalHeart.Stop();
+            TaskDriver.Stop();
+            GoalDriver.Reset();
         }
 
-        public void LogWarn(string message)
+        private BrainConfig LoadBrainConfig()
         {
-            Dispatcher.RunOnMainThread(() =>
-            {
-                this.Logger.LogWarning(message);
-                GameAPI.Notify("Autoccultist Warning", message);
-            });
-        }
-
-        public void Fatal(string message)
-        {
-            Dispatcher.RunOnMainThread(() =>
-            {
-                this.Logger.LogError("Fatal - " + message);
-                GameAPI.Notify("Autoccultist Fatal", message);
-                this.isRunning = false;
-                this.brain.Stop();
-            });
-        }
-
-        private void UpdateChildren()
-        {
-            this.brain.Update();
-            SituationOrchestrator.Update();
-            AutoccultistActor.Update();
+            var configPath = Path.Combine(AssemblyDirectory, "brain.yml");
+            this.LogInfo(string.Format("Loading config from {0}", configPath));
+            return BrainConfig.Load(configPath);
         }
     }
 }
