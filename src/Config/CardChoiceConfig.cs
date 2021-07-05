@@ -5,11 +5,13 @@ namespace Autoccultist.Config
     using Autoccultist;
     using Autoccultist.Config.Conditions;
     using Autoccultist.GameState;
+    using Autoccultist.Yaml;
+    using YamlDotNet.Core;
 
     /// <summary>
     /// Represents a choice of a card based on various attributes.
     /// </summary>
-    public class CardChoiceConfig : ICardChooser, IConfigObject
+    public class CardChoiceConfig : ICardChooser, IConfigObject, IAfterYamlDeserialization
     {
         /// <summary>
         /// Specify whether the card choice should go for the oldest or youngest card it can find.
@@ -42,7 +44,7 @@ namespace Autoccultist.Config
         /// <summary>
         /// Gets or sets a value indicating whether the card must or must not be unique.
         /// </summary>
-        public bool? IsUnique { get; set; }
+        public bool? Unique { get; set; }
 
         /// <summary>
         /// Gets or sets a list of aspects forbidden to be on the chosen card.
@@ -62,15 +64,6 @@ namespace Autoccultist.Config
         public CardAgeSelection? AgeBias { get; set; }
 
         /// <inheritdoc/>
-        public void Validate()
-        {
-            if (string.IsNullOrEmpty(this.ElementId) && (this.Aspects == null || this.Aspects.Count == 0))
-            {
-                throw new InvalidConfigException("Card choice must have either an elementId or aspects.");
-            }
-        }
-
-        /// <inheritdoc/>
         public ICardState ChooseCard(IEnumerable<ICardState> cards)
         {
             // TODO: We could have some weighing mechanism to let a config specify which cards are higher priority than others?
@@ -84,7 +77,7 @@ namespace Autoccultist.Config
                 where this.ForbiddenElementIds?.Contains(card.ElementId) != true
                 where aspectsAsCondition == null || card.Aspects.HasAspects(aspectsAsCondition)
                 where this.ForbiddenAspects?.Intersect(card.Aspects.Keys).Any() != true
-                where !this.IsUnique.HasValue || card.IsUnique == this.IsUnique.Value
+                where !this.Unique.HasValue || card.IsUnique == this.Unique.Value
                 select card;
 
             // Sort for age bias.
@@ -105,6 +98,15 @@ namespace Autoccultist.Config
             }
 
             return candidates.FirstOrDefault();
+        }
+
+        /// <inheritdoc/>
+        public void AfterDeserialized(Mark start, Mark end)
+        {
+            if (string.IsNullOrEmpty(this.ElementId) && (this.Aspects == null || this.Aspects.Count == 0))
+            {
+                throw new InvalidConfigException("Card choice must have either an elementId or aspects.");
+            }
         }
     }
 }
